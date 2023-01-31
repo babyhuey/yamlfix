@@ -39,7 +39,7 @@ def fix_files(  # pylint: disable=too-many-branches
     files: Files,
     dry_run: Optional[bool] = None,
     config: Optional[YamlfixConfig] = None,
-) -> str | tuple[str | Any, bool, str] | None:  # noqa: TAE002
+) -> Union[Optional[str], Tuple[Optional[str], bool]]:
     """Fix the yaml source code of a list of files.
 
     If the input is taken from stdin, it will return the fixed value.
