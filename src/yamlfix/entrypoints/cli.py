@@ -81,23 +81,26 @@ def cli(
         sys.exit(0)
 
     load_logger(verbose)
-    log.info(
-        "%s files:%s",
-        "Checking" if check else "Fixing",
-        _format_file_list(files_to_fix),
-    )
+    if check:
+        log.info(
+            "Checking files:%s",
+            _format_file_list(files_to_fix),
+        )
 
     config = YamlfixConfig()
     configure_yamlfix(
         config, config_file, _parse_env_vars_as_yamlfix_config(env_prefix.lower())
     )
 
-    fixed_code, changed = services.fix_files(files_to_fix, check, config)
+    fixed_code, changed, fixed_source = services.fix_files(files_to_fix, check, config)
     for file_to_close in files_to_fix:
         file_to_close.close()
-
-    if fixed_code is not None:
-        print(fixed_code, end="")
+    if fixed_code:
+        log.info(f"Files fixed: {fixed_code}")
+    elif fixed_source:
+        print(fixed_source, end="")
+    elif not fixed_code:
+        log.info("Nothing to fix")
     log.info("Done.")
 
     if changed and check:

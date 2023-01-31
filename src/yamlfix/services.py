@@ -6,7 +6,7 @@ and handlers to achieve the program's purpose.
 
 import logging
 import warnings
-from typing import List, Optional, Tuple, Union, overload
+from typing import List, Optional, Tuple, Union, overload, Any
 
 from _io import TextIOWrapper
 
@@ -39,7 +39,7 @@ def fix_files(  # pylint: disable=too-many-branches
     files: Files,
     dry_run: Optional[bool] = None,
     config: Optional[YamlfixConfig] = None,
-) -> Union[Optional[str], Tuple[Optional[str], bool]]:  # noqa: TAE002
+) -> str | tuple[str | Any, bool, str] | None:  # noqa: TAE002
     """Fix the yaml source code of a list of files.
 
     If the input is taken from stdin, it will return the fixed value.
@@ -55,6 +55,7 @@ def fix_files(  # pylint: disable=too-many-branches
         * A bool to indicate whether at least one file has been changed.
     """
     changed = False
+    fixed_code = ""
 
     if dry_run is None:
         warnings.warn(
@@ -87,7 +88,7 @@ def fix_files(  # pylint: disable=too-many-branches
         if file_name == "<stdin>":
             if dry_run is None:
                 return fixed_source
-            return (fixed_source, changed)
+            return fixed_code, changed, fixed_source
 
         if fixed_source != source:
             if dry_run:
@@ -101,13 +102,14 @@ def fix_files(  # pylint: disable=too-many-branches
                 file_.write(fixed_source)
                 file_.truncate()
             log.debug("Fixed file %s.", file_name)
+            fixed_code = fixed_code + "\n  - " + file_name
         else:
             log.debug("Left file %s unmodified.", file_name)
 
     if dry_run is None:
         return None
 
-    return (None, changed)
+    return fixed_code, changed, None
 
 
 def fix_code(source_code: str, config: Optional[YamlfixConfig] = None) -> str:
