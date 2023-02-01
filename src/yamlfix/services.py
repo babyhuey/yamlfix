@@ -6,7 +6,7 @@ and handlers to achieve the program's purpose.
 
 import logging
 import warnings
-from typing import List, Optional, Tuple, Union, overload, Any
+from typing import List, Optional, Tuple, Union, overload
 
 from _io import TextIOWrapper
 
